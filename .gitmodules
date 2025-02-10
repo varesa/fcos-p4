@@ -1,4 +1,4 @@
-[submodule "fedora-coreos-config"]
-	path = fedora-coreos-config
-	url = https://github.com/coreos/fedora-coreos-config.git
-	branch = stable
+[submodule "custom-coreos-disk-images"]
+	path = custom-coreos-disk-images
+	url = https://github.com/coreos/custom-coreos-disk-images.git
+	branch = main

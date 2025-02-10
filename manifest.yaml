@@ -1,8 +1,0 @@
-ref: p4/${basearch}/coreos/stable
-include: fedora-coreos-config/manifest.yaml
-
-packages:
-- frr
-
-repos:
-- fedora
