@@ -40,11 +40,15 @@ storage:
             Before=blockdev@dev-data-ceph.target
             Before=blockdev@dev-data-containers.target
             Before=blockdev@dev-data-rancher.target
-            RequiredBy=multi-user.target
 
             [Service]
             ExecStart=/usr/local/sbin/setup-data.sh
             Type=oneshot
+
+            [Install]
+            WantedBy=blockdev@dev-data-ceph.target
+            WantedBy=blockdev@dev-data-containers.target
+            WantedBy=blockdev@dev-data-rancher.target
 
     - path: /etc/systemd/system/var-lib-ceph.mount
       mode: 0644
@@ -52,14 +56,17 @@ storage:
         inline: |
             [Unit]
             After=blockdev@dev-data-ceph.target
+            Requires=blockdev@dev-data-ceph.target
             Before=local-fs.target
             Before=ceph.target
-            RequiredBy=ceph.target
 
             [Mount]
             What=/dev/data/ceph
             Where=/var/lib/ceph
             Type=xfs
+
+            [Install]
+            RequiredBy=ceph.target
 
     - path: /etc/systemd/system/var-lib-containers.mount
       mode: 0644
@@ -67,29 +74,44 @@ storage:
         inline: |
             [Unit]
             After=blockdev@dev-data-containers.target
+            Requires=blockdev@dev-data-containers.target
             Before=local-fs.target
             Before=ceph.target
-            RequiredBy=ceph.target
 
             [Mount]
             What=/dev/data/containers
             Where=/var/lib/containers
             Type=xfs
 
+            [Install]
+            RequiredBy=ceph.target
+
     - path: /etc/systemd/system/var-lib-rancher.mount
       mode: 0644
       contents:
         inline: |
             [Unit]
+            Requires=blockdev@dev-data-rancher.target
             After=blockdev@dev-data-rancher.target
             Before=local-fs.target
             Before=k3s.service
-            RequiredBy=k3s.service
 
             [Mount]
             What=/dev/data/rancher
             Where=/var/lib/rancher
             Type=xfs
+
+            [Install]
+            RequiredBy=k3s.service
+
+    - path: /etc/systemd/system-preset/99-custom.preset
+      mode: 0644
+      contents:
+        inline: |
+            enable setup-data.service
+            enable var-lib-ceph.mount
+            enable var-lib-containers.mount
+            enable var-lib-rancher.mount
 
   disks:
     - device: /dev/sda
