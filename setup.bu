@@ -16,14 +16,81 @@ passwd:
 # https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_advanced_examples
 storage:
   files:
-    - path: /etc/ssh/sshd_config.d/20-enable-passwords.conf
+    - path: /usr/sbin/setup-data.sh
+      mode: 0755
+      contents:
+        inline: |
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            pvdisplay /dev/disk/by-label/log || pvcreate /dev/disk/by-label/log
+            vgdisplay data || vgcreate data /dev/disk/by-label/log
+
+            # even if the check for some reason misbehaves, mkfs will fail safely if existing data is found
+            lvdisplay data/ceph || (lvcreate data --name ceph --size 5G && mkfs.xfs /dev/data/ceph)
+            lvdisplay data/containers || (lvcreate data --name containers --size 15G && mkfs.xfs /dev/data/containers)
+            lvdisplay data/rancher || (lvcreate data --name rancher --size 15G && mkfs.xfs /dev/data/rancher)
+
+    - path: /etc/systemd/system/setup-data.service
       mode: 0644
       contents:
         inline: |
-          # Fedora CoreOS disables SSH password login by default.
-          # Enable it.
-          # This file must sort before 40-disable-passwords.conf.
-          PasswordAuthentication yes
+            [Unit]
+            Description=Setup LVM on the data volume
+            Before=blockdev@dev-data-ceph.target
+            Before=blockdev@dev-data-containers.target
+            Before=blockdev@dev-data-rancher.target
+            RequiredBy=multi-user.target
+
+            [Service]
+            ExecStart=/usr/sbin/setup-data.sh
+            Type=oneshot
+
+    - path: /etc/systemd/system/var-lib-ceph.mount
+      mode: 0644
+      contents:
+        inline: |
+            [Unit]
+            After=blockdev@dev-data-ceph.target
+            Before=local-fs.target
+            Before=ceph.target
+            RequiredBy=ceph.target
+
+            [Mount]
+            What=/dev/data/ceph
+            Where=/var/lib/ceph
+            Type=xfs
+
+    - path: /etc/systemd/system/var-lib-containers.mount
+      mode: 0644
+      contents:
+        inline: |
+            [Unit]
+            After=blockdev@dev-data-containers.target
+            Before=local-fs.target
+            Before=ceph.target
+            RequiredBy=ceph.target
+
+            [Mount]
+            What=/dev/data/containers
+            Where=/var/lib/containers
+            Type=xfs
+
+    - path: /etc/systemd/system/var-lib-rancher.mount
+      mode: 0644
+      contents:
+        inline: |
+            [Unit]
+            After=blockdev@dev-data-rancher.target
+            Before=local-fs.target
+            Before=k3s.service
+            RequiredBy=k3s.service
+
+            [Mount]
+            What=/dev/data/rancher
+            Where=/var/lib/rancher
+            Type=xfs
+
   disks:
     - device: /dev/sda
       wipe_table: true
@@ -54,6 +121,11 @@ storage:
       devices:
         - /dev/disk/by-partlabel/log-1
         - /dev/disk/by-partlabel/log-2
+    - name: data
+      level: raid1
+      devices:
+        - /dev/disk/by-partlabel/data-1
+        - /dev/disk/by-partlabel/data-2
   filesystems:
     - device: /dev/md/log
       path: /var/log
