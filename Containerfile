@@ -13,4 +13,5 @@ RUN curl -sfL https://get.k3s.io | sh - && \
 
 RUN dnf install -y frr-$INSTALL_FRR_VERSION && \
     dnf clean all && \
+    rm -rf /var/run && \
     ostree container commit
