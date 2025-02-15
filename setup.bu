@@ -41,8 +41,8 @@ storage:
             # As this sets up filesystems, sysinit.target / local-fs.target depend on this. 
             # Do not depend on sysinit.target but make sure that the script itself is mounted
             DefaultDependencies=no
-            After=var.mount
-            Requires=var.mount
+            After=var.mount dev-md-data.device
+            Requires=var.mount dev-md-data.device
 
             Before=blockdev@dev-data-ceph.target
             Before=blockdev@dev-data-ceph.target
