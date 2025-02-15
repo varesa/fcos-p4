@@ -1,0 +1,63 @@
+variant: fcos
+version: 1.6.0
+boot_device:
+  mirror:
+    devices:
+      - /dev/sda
+      - /dev/sdb
+passwd:
+  users:
+    - name: core
+      password_hash: '$y$j9T$dvpIXblZrJi87AxEFV367/$iS0I2dVQ.abcCAjauuHDpEPTJCu8huDsTystuNy7z1C'
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA05sdc/e7Momfqxt0wcsainDsi8tIlyMvjIugTteoTU esa@desktop.tre.esav.fi
+      groups:
+        - wheel
+# https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_advanced_examples
+storage:
+  files:
+    - path: /etc/ssh/sshd_config.d/20-enable-passwords.conf
+      mode: 0644
+      contents:
+        inline: |
+          # Fedora CoreOS disables SSH password login by default.
+          # Enable it.
+          # This file must sort before 40-disable-passwords.conf.
+          PasswordAuthentication yes
+  disks:
+    - device: /dev/sda
+      wipe_table: true
+      partitions:
+        # Override size of root partition on first disk, via the label
+        # generated for boot_device.mirror
+        - label: root-1
+          size_mib: 20480
+        - label: log-1
+          size_mib: 10240
+        - label: data-1
+          size_mib: 51200
+        - label: osd-1
+    - device: /dev/sdb
+      wipe_table: true
+      partitions:
+        # Similarly for second disk
+        - label: root-2
+          size_mib: 20480
+        - label: log-2
+          size_mib: 10240
+        - label: data-2
+          size_mib: 51200
+        - label: osd-2
+  raid:
+    - name: log
+      level: raid1
+      devices:
+        - /dev/disk/by-partlabel/log-1
+        - /dev/disk/by-partlabel/log-2
+  filesystems:
+    - device: /dev/md/log
+      path: /var/log
+      label: log
+      format: xfs
+      wipe_filesystem: true
+      with_mount_unit: true
