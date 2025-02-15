@@ -17,6 +17,8 @@ podman run --rm -i \
     quay.io/coreos/butane:release \
     --pretty --strict < "$CONFIG" > config.ign
 
+[[ -f ignited.iso ]] && rm ignited.iso
+
 podman run --security-opt label=disable --pull=always --rm -v .:/data -w /data \
     quay.io/coreos/coreos-installer:release \
     iso customize --dest-ignition config.ign --dest-device /dev/sda --dest-console ttyS0,115200n8 \
