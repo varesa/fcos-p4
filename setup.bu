@@ -23,8 +23,8 @@ storage:
             #!/usr/bin/env bash
             set -euo pipefail
 
-            pvdisplay /dev/disk/by-label/data || pvcreate /dev/disk/by-label/data
-            vgdisplay data || vgcreate data /dev/disk/by-label/data
+            pvdisplay /dev/md/data || pvcreate /dev/md/data
+            vgdisplay data || vgcreate data /dev/md/data
 
             # even if the check for some reason misbehaves, mkfs will fail safely if existing data is found
             lvdisplay data/ceph || (lvcreate data --name ceph --size 5G && mkfs.xfs /dev/data/ceph)
@@ -39,8 +39,12 @@ storage:
             Description=Setup LVM on the data volume
 
             # As this sets up filesystems, sysinit.target / local-fs.target depend on this. 
-            # Do not depend on sysinit.target
+            # Do not depend on sysinit.target but make sure that the script itself is mounted
             DefaultDependencies=no
+            After=var.mount
+            Requires=var.mount
+
+            Before=blockdev@dev-data-ceph.target
             Before=blockdev@dev-data-ceph.target
             Before=blockdev@dev-data-containers.target
             Before=blockdev@dev-data-rancher.target
