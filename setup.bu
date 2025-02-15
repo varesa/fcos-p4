@@ -16,7 +16,7 @@ passwd:
 # https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_advanced_examples
 storage:
   files:
-    - path: /usr/sbin/setup-data.sh
+    - path: /usr/local/sbin/setup-data.sh
       mode: 0755
       contents:
         inline: |
@@ -43,7 +43,7 @@ storage:
             RequiredBy=multi-user.target
 
             [Service]
-            ExecStart=/usr/sbin/setup-data.sh
+            ExecStart=/usr/local/sbin/setup-data.sh
             Type=oneshot
 
     - path: /etc/systemd/system/var-lib-ceph.mount
