@@ -24,7 +24,7 @@ storage:
              neighbor ens1f1np1 interface remote-as 65400
              !
              address-family ipv4 unicast
-              redistribute connected
+              network 10.4.3.5/32
              exit-address-family
              !
              address-family l2vpn evpn
