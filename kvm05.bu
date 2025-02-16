@@ -3,8 +3,15 @@ version: 1.6.0
 
 storage:
   files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: kvm05.p4.esav.fi
+
     - path: /etc/frr/frr.conf
       mode: 0644
+      overwrite: true
       contents:
         inline: |
             frr version 10.2
@@ -31,6 +38,7 @@ storage:
 
     - path: /etc/frr/daemons
       mode: 0644
+      overwrite: true
       contents:
         inline: |
             bgpd=yes
@@ -72,5 +80,46 @@ storage:
 
 systemd:
     units:
-      - name: frr.service
-        enabled: true
+    - name: frr.service
+      enabled: true
+
+    - name: NetworkManager.service
+      enabled: false
+
+    - name: evpn.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set up interfaces for EVPN
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/sbin/ip address add 10.4.3.5/32 dev lo
+
+        ExecStart=/usr/sbin/ip link set ens1f1np1 mtu 9124
+        ExecStart=/usr/sbin/ip link set ens1f1np1 mtu 9124
+
+        ExecStart=/usr/sbin/ip link add br0 type bridge vlan_filtering 1
+        ExecStart=/usr/sbin/ip link set br0 up
+
+        ExecStart=/usr/sbin/ip link add vxlan0 type vxlan local 10.4.3.5 dstport 4789 nolearning external
+        ExecStart=/usr/sbin/ip link set vxlan0 master br0
+        ExecStart=/usr/sbin/ip link set vxlan0 type bridge_slave vlan_tunnel on
+        ExecStart=/usr/sbin/ip link set vxlan0 up
+
+        ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2100 self
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2100
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2100 tunnel_info id 2100
+        ExecStart=/usr/sbin/ip link add link br0 name managementx up type vlan id 2100
+        ExecStart=/usr/sbin/ip address add 10.4.0.35/24 dev managementx
+        ExecStart=/usr/sbin/ip route add default via 10.4.0.1
+
+        ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2102 self
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2102
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2102 tunnel_info id 2102
+        ExecStart=/usr/sbin/ip link add link br0 name storagex up type vlan id 2102
+        ExecStart=/usr/sbin/ip address add 10.4.2.35/24 dev storagex
+
+        [Install]
+        WantedBy=multi-user.target
+
