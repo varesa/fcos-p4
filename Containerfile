@@ -11,7 +11,9 @@ ENV INSTALL_K3S_SYSTEMD_DIR=/usr/lib/systemd/system
 ENV INSTALL_K3S_SKIP_ENABLE=true
 ENV INSTALL_K3S_SKIP_START=true
 
-RUN curl -sfL https://get.k3s.io | sh - && \
+COPY install-k3s.sh /tmp/install-k3s.sh
+RUN sh /tmp/install-k3s.sh && \
+    rm /tmp/install-k3s.sh && \
     ln -s ../k3s.service /usr/lib/systemd/system/multi-user.target.wants/k3s.service
 
 RUN dnf install -y \
