@@ -21,6 +21,7 @@ RUN dnf install -y \
         openvswitch-$INSTALL_OVS_VERSION \
         libvirt-client-$INSTALL_LIBVIRT_VERSION libvirt-daemon-kvm-$INSTALL_LIBVIRT_VERSION \
         qemu-kvm-$INSTALL_QEMU_VERSION \
+        tcpdump iperf3
     && \
     dnf clean all && \
     rm -rf /var/run && \
