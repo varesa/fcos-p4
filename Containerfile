@@ -14,7 +14,8 @@ ENV INSTALL_K3S_SKIP_START=true
 COPY install-k3s.sh /tmp/install-k3s.sh
 RUN sh /tmp/install-k3s.sh && \
     rm /tmp/install-k3s.sh && \
-    ln -s ../k3s.service /usr/lib/systemd/system/multi-user.target.wants/k3s.service
+    ln -s ../k3s.service /usr/lib/systemd/system/multi-user.target.wants/k3s.service && \
+    ostree container commit
 
 RUN dnf install -y \
         frr-$INSTALL_FRR_VERSION \
