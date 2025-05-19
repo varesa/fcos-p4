@@ -120,6 +120,8 @@ storage:
             enable var-lib-ceph.mount
             enable var-lib-containers.mount
             enable var-lib-rancher.mount
+            enable libvirtd.service
+            enable k3s.service
 
   disks:
     - device: /dev/sda

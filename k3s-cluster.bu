@@ -1,0 +1,21 @@
+variant: fcos
+version: 1.6.0
+
+storage:
+  files:
+    - path: /etc/systemd/system/k3s.service.d/join-cluster.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+            [Service]
+            ExecStart=
+            ExecStart=/usr/bin/k3s \
+                server \
+                    '--server' \
+                    'https://10.4.3.2:6443' \
+                    '--flannel-backend=host-gw' \
+                    '--cluster-cidr=100.96.0.0/16' \
+                    '--disable-network-policy' \
+                    '--disable=traefik'
+
