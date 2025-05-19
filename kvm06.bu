@@ -7,7 +7,7 @@ storage:
       mode: 0644
       overwrite: true
       contents:
-        inline: kvm05
+        inline: kvm06
 
     - path: /etc/frr/frr.conf
       mode: 0644
@@ -16,20 +16,20 @@ storage:
         inline: |
             frr version 10.2
             frr defaults traditional
-            hostname kvm05.p4.esav.fi
+            hostname kvm06.p4.esav.fi
             !
-            router bgp 65405
+            router bgp 65406
              no bgp ebgp-requires-policy
-             neighbor ens1f0np0 interface remote-as 65400
-             neighbor ens1f1np1 interface remote-as 65400
+             neighbor eno1np0 interface remote-as 65400
+             neighbor eno2np1 interface remote-as 65400
              !
              address-family ipv4 unicast
-              network 10.4.3.5/32
+              network 10.4.3.6/32
              exit-address-family
              !
              address-family l2vpn evpn
-              neighbor ens1f0np0 activate
-              neighbor ens1f1np1 activate
+              neighbor eno1np0 activate
+              neighbor eno2np1 activate
               advertise-all-vni
               advertise-default-gw
              exit-address-family
@@ -86,6 +86,9 @@ systemd:
     - name: NetworkManager.service
       enabled: false
 
+    - name: NetworkManager-wait-online.service
+      enabled: false
+
     - name: evpn.service
       enabled: true
       contents: |
@@ -94,15 +97,15 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/sbin/ip address add 10.4.3.5/32 dev lo
+        ExecStart=/usr/sbin/ip address add 10.4.3.6/32 dev lo
 
-        ExecStart=/usr/sbin/ip link set ens1f0np0 mtu 9124 up
-        ExecStart=/usr/sbin/ip link set ens1f1np1 mtu 9124 up
+        ExecStart=/usr/sbin/ip link set eno1np0 mtu 9124 up
+        ExecStart=/usr/sbin/ip link set eno2np1 mtu 9124 up
 
         ExecStart=/usr/sbin/ip link add br0 type bridge vlan_filtering 1
         ExecStart=/usr/sbin/ip link set br0 up
 
-        ExecStart=/usr/sbin/ip link add vxlan0 type vxlan local 10.4.3.5 dstport 4789 nolearning external
+        ExecStart=/usr/sbin/ip link add vxlan0 type vxlan local 10.4.3.6 dstport 4789 nolearning external
         ExecStart=/usr/sbin/ip link set vxlan0 master br0
         ExecStart=/usr/sbin/ip link set vxlan0 type bridge_slave vlan_tunnel on
         ExecStart=/usr/sbin/ip link set vxlan0 up
@@ -111,14 +114,16 @@ systemd:
         ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2100
         ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2100 tunnel_info id 2100
         ExecStart=/usr/sbin/ip link add link br0 name managementx up type vlan id 2100
-        ExecStart=/usr/sbin/ip address add 10.4.0.35/24 dev managementx
+        ExecStart=/usr/sbin/ip address add 10.4.0.36/24 dev managementx
         ExecStart=/usr/sbin/ip route add default via 10.4.0.1
 
         ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2102 self
         ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2102
         ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2102 tunnel_info id 2102
         ExecStart=/usr/sbin/ip link add link br0 name storagex up type vlan id 2102
-        ExecStart=/usr/sbin/ip address add 10.4.2.35/24 dev storagex
+        ExecStart=/usr/sbin/ip address add 10.4.2.36/24 dev storagex
+
+        ExecStart=/usr/bin/resolvectl dns managementx 10.10.10.10
 
         [Install]
         WantedBy=multi-user.target
