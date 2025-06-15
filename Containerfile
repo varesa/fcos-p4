@@ -26,4 +26,6 @@ RUN dnf install -y \
     && \
     dnf clean all && \
     rm -rf /var/run && \
+    mkdir /usr/lib/systemd/system/libvirtd.service.d/ && \
+    echo -e '[Service]\nEnvironment=LIBVIRTD_ARGS=""' > /usr/lib/systemd/system/libvirtd.service.d/disable-timeout.conf && \
     ostree container commit
