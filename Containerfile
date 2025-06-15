@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora-coreos:42.20250515.20.0@sha256:ce2a276c3d43996b6c07989514f81afa6626ce57954b85587f3c0eca0c08f1e6
+FROM quay.io/fedora/fedora-coreos:42.20250611.20.0@sha256:16df419deaa715eed748bba79dd0bf4e3fb06e5452e96e10baa5bdcf4c2f585b
 
 ENV INSTALL_K3S_VERSION=v1.31.5+k3s1
 ENV INSTALL_FRR_VERSION=10.2-4.fc42
