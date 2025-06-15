@@ -5,18 +5,9 @@ boot_device:
     devices:
       - /dev/sda
       - /dev/sdb
-passwd:
-  users:
-    - name: core
-      password_hash: '$y$j9T$dvpIXblZrJi87AxEFV367/$iS0I2dVQ.abcCAjauuHDpEPTJCu8huDsTystuNy7z1C'
-      ssh_authorized_keys:
-        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA05sdc/e7Momfqxt0wcsainDsi8tIlyMvjIugTteoTU esa@desktop.tre.esav.fi
-      groups:
-        - wheel
+
 # https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_advanced_examples
 storage:
-  directories:
-    - path: /etc/systemd/system/libvirtd.service.d
   files:
     - path: /usr/local/sbin/setup-data.sh
       mode: 0755
@@ -114,7 +105,7 @@ storage:
             [Install]
             RequiredBy=k3s.service
 
-    - path: /etc/systemd/system-preset/99-custom.preset
+    - path: /etc/systemd/system-preset/98-storage.preset
       mode: 0644
       contents:
         inline: |
@@ -122,15 +113,6 @@ storage:
             enable var-lib-ceph.mount
             enable var-lib-containers.mount
             enable var-lib-rancher.mount
-            enable libvirtd.service
-            enable k3s.service
-
-    - path: /etc/systemd/system/libvirtd.service.d/disable-timeout.conf
-      mode: 0644
-      contents:
-        inline: |
-            [Service]
-            Environment=LIBVIRTD_ARGS=""
 
   disks:
     - device: /dev/sda

@@ -13,9 +13,14 @@ storage:
             ExecStart=/usr/bin/k3s \
                 server \
                     '--server' \
-                    'https://10.4.3.2:6443' \
+                    'https://10.4.3.5:6443' \
                     '--flannel-backend=host-gw' \
                     '--cluster-cidr=100.96.0.0/16' \
                     '--disable-network-policy' \
                     '--disable=traefik'
 
+    - path: /etc/systemd/system-preset/99-k3s.preset
+      mode: 0644
+      contents:
+        inline: |
+            enable k3s.service
