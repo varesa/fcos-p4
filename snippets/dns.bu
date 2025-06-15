@@ -1,0 +1,18 @@
+variant: fcos
+version: 1.6.0
+
+# https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_advanced_examples
+storage:
+  directories:
+    - path: /etc/systemd/resolved.conf.d
+
+  files:
+    - path: /etc/systemd/resolved.conf.d/dns_servers.conf
+      mode: 0644
+      contents:
+        inline: |
+            [Resolve]
+            DNS=10.10.10.10
+            Domains=~.
+
+
