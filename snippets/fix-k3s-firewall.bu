@@ -1,0 +1,20 @@
+variant: fcos
+version: 1.6.0
+
+storage:
+  files:
+    - path: /etc/systemd/system/k3s.service.d/join-cluster.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+            [Service]
+            ExecStartPost=bash -c '\
+                until nft list ruleset 2>/dev/null| grep -q KUBE-FORWARD; do \
+                    sleep 1; \
+                done; \
+                nft list chain ip filter FORWARD 2>/dev/null \
+                  | head -n 4 \
+                  | grep -q \'iif "br0" oif "br0" accept\' \
+                  || nft insert rule filter FORWARD iif br0 oif br0 accept'
+
