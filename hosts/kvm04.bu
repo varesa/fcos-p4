@@ -1,0 +1,125 @@
+variant: fcos
+version: 1.6.0
+
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: kvm04
+
+    - path: /etc/frr/frr.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+            frr version 10.2
+            frr defaults traditional
+            hostname kvm04.p4.esav.fi
+            !
+            router bgp 65404
+             no bgp ebgp-requires-policy
+             neighbor ens1f0np0 interface remote-as 65400
+             neighbor ens1f1np1 interface remote-as 65400
+             !
+             address-family ipv4 unicast
+              network 10.4.3.4/32
+             exit-address-family
+             !
+             address-family l2vpn evpn
+              neighbor ens1f0np0 activate
+              neighbor ens1f1np1 activate
+              advertise-all-vni
+              advertise-default-gw
+             exit-address-family
+            exit
+            !
+
+    - path: /etc/frr/daemons
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+            bgpd=yes
+            ospfd=no
+            ospf6d=no
+            ripd=no
+            ripngd=no
+            isisd=no
+            pimd=no
+            pim6d=no
+            nhrpd=no
+            eigrpd=no
+            sharpd=no
+            pbrd=no
+            bfdd=no
+            fabricd=no
+            vrrpd=no
+            pathd=no
+            vtysh_enable=yes
+            zebra_options="  -A 127.0.0.1 -s 90000000"
+            mgmtd_options="  -A 127.0.0.1"
+            bgpd_options="   -A 127.0.0.1"
+            ospfd_options="  -A 127.0.0.1"
+            ospf6d_options=" -A ::1"
+            ripd_options="   -A 127.0.0.1"
+            ripngd_options=" -A ::1"
+            isisd_options="  -A 127.0.0.1"
+            pimd_options="   -A 127.0.0.1"
+            pim6d_options="  -A ::1"
+            nhrpd_options="  -A 127.0.0.1"
+            eigrpd_options=" -A 127.0.0.1"
+            sharpd_options=" -A 127.0.0.1"
+            pbrd_options="   -A 127.0.0.1"
+            staticd_options="-A 127.0.0.1"
+            bfdd_options="   -A 127.0.0.1"
+            fabricd_options="-A 127.0.0.1"
+            vrrpd_options="  -A 127.0.0.1"
+            pathd_options="  -A 127.0.0.1"
+
+systemd:
+    units:
+    - name: frr.service
+      enabled: true
+
+    - name: NetworkManager.service
+      enabled: false
+
+    - name: evpn.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set up interfaces for EVPN
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/sbin/ip address add 10.4.3.4/32 dev lo
+
+        ExecStart=/usr/sbin/ip link set ens1f0np0 mtu 9124 up
+        ExecStart=/usr/sbin/ip link set ens1f1np1 mtu 9124 up
+
+        ExecStart=/usr/sbin/ip link add br0 type bridge vlan_filtering 1
+        ExecStart=/usr/sbin/ip link set br0 up
+
+        ExecStart=/usr/sbin/ip link add vxlan0 type vxlan local 10.4.3.4 dstport 4789 nolearning external
+        ExecStart=/usr/sbin/ip link set vxlan0 master br0
+        ExecStart=/usr/sbin/ip link set vxlan0 type bridge_slave vlan_tunnel on
+        ExecStart=/usr/sbin/ip link set vxlan0 up
+
+        ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2100 self
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2100
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2100 tunnel_info id 2100
+        ExecStart=/usr/sbin/ip link add link br0 name managementx up type vlan id 2100
+        ExecStart=/usr/sbin/ip address add 10.4.0.34/24 dev managementx
+        ExecStart=/usr/sbin/ip route add default via 10.4.0.1
+
+        ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2102 self
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2102
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2102 tunnel_info id 2102
+        ExecStart=/usr/sbin/ip link add link br0 name storagex up type vlan id 2102
+        ExecStart=/usr/sbin/ip address add 10.4.2.34/24 dev storagex
+
+        [Install]
+        WantedBy=multi-user.target
+
