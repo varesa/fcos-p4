@@ -8,7 +8,11 @@ storage:
       overwrite: true
       contents:
         inline: |
+            [Unit]
+            ConditionPathExists=/etc/systemd/system/k3s.service.env
+
             [Service]
+            EnvironmentFile=/etc/systemd/system/k3s.service.env
             ExecStart=
             ExecStart=/usr/bin/k3s \
                 server \
@@ -17,7 +21,9 @@ storage:
                     '--flannel-backend=host-gw' \
                     '--cluster-cidr=100.96.0.0/16' \
                     '--disable-network-policy' \
-                    '--disable=traefik'
+                    '--disable=traefik' \
+                    '--tls-san' $K3S_VIP_TLS_SAN
+
 
     - path: /etc/systemd/system-preset/99-k3s.preset
       mode: 0644
