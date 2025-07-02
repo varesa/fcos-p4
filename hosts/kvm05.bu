@@ -86,6 +86,9 @@ systemd:
     - name: NetworkManager.service
       enabled: false
 
+    - name: NetworkManager-wait-online.service
+      enabled: false
+
     - name: evpn.service
       enabled: true
       contents: |
