@@ -3,7 +3,7 @@ version: 1.6.0
 passwd:
   users:
     - name: core
-      password_hash: '$y$j9T$dvpIXblZrJi87AxEFV367/$iS0I2dVQ.abcCAjauuHDpEPTJCu8huDsTystuNy7z1C'
+      password_hash: '$y$j9T$dvpIXblZrJi87AxEFV367/$iS0I2dVQ.abcCAjauuHDpEPTJCu8huDsTystuNy7z1C' # 'password' for initial debug
       ssh_authorized_keys:
         - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA05sdc/e7Momfqxt0wcsainDsi8tIlyMvjIugTteoTU esa@desktop.tre.esav.fi
       groups:
