@@ -3,20 +3,18 @@ version: 1.6.0
 
 # https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_advanced_examples
 storage:
-  directories:
-    - path: /etc/systemd/system/libvirtd.service.d
+#  directories:
+#    - path: /etc/systemd/system/libvirtd.service.d
   files:
-
     - path: /etc/systemd/system-preset/99-libvirt.preset
       mode: 0644
       contents:
         inline: |
-            enable libvirtd.service
+            enable virtqemud.service
 
-    - path: /etc/systemd/system/libvirtd.service.d/disable-timeout.conf
-      mode: 0644
-      contents:
-        inline: |
-            [Service]
-            Environment=LIBVIRTD_ARGS=""
-
+#    - path: /etc/systemd/system/libvirtd.service.d/disable-timeout.conf
+#      mode: 0644
+#      contents:
+#        inline: |
+#            [Service]
+#            Environment=LIBVIRTD_ARGS=""
