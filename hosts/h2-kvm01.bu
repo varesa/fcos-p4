@@ -1,0 +1,79 @@
+variant: fcos
+version: 1.6.0
+
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: kvm01
+
+    - path: /etc/frr/frr.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+            frr version 10.2
+            frr defaults traditional
+            hostname kvm01.h2.esav.fi
+            !
+            router bgp 65201
+             no bgp ebgp-requires-policy
+             neighbor eno1np0 interface remote-as external
+             neighbor eno2np1 interface remote-as external
+             !
+             address-family ipv4 unicast
+              network 10.64.3.1/32
+             exit-address-family
+             !
+             address-family l2vpn evpn
+              neighbor eno1np0 activate
+              neighbor eno2np1 activate
+              advertise-all-vni
+              advertise-default-gw
+             exit-address-family
+            exit
+            !
+
+systemd:
+    units:
+    - name: evpn.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set up interfaces for EVPN
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/sbin/ip address add 10.64.3.1/32 dev lo
+
+        ExecStart=/usr/sbin/ip link set eno1np0 mtu 9124 up
+        ExecStart=/usr/sbin/ip link set eno2np1 mtu 9124 up
+
+        ExecStart=/usr/sbin/ip link add br0 type bridge vlan_filtering 1
+        ExecStart=/usr/sbin/ip link set br0 up
+
+        ExecStart=/usr/sbin/ip link add vxlan0 type vxlan local 10.64.3.1 dstport 4789 nolearning external
+        ExecStart=/usr/sbin/ip link set vxlan0 master br0
+        ExecStart=/usr/sbin/ip link set vxlan0 type bridge_slave vlan_tunnel on
+        ExecStart=/usr/sbin/ip link set vxlan0 up
+
+        ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2200 self
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2200
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2200 tunnel_info id 2200
+        ExecStart=/usr/sbin/ip link add link br0 name managementx up type vlan id 2200
+        ExecStart=/usr/sbin/ip address add 10.64.0.31/24 dev managementx
+        ExecStart=/usr/sbin/ip route add default via 10.64.0.1
+
+        ExecStart=/usr/sbin/bridge vlan add dev br0 vid 2202 self
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2202
+        ExecStart=/usr/sbin/bridge vlan add dev vxlan0 vid 2202 tunnel_info id 2202
+        ExecStart=/usr/sbin/ip link add link br0 name storagex up type vlan id 2202
+        ExecStart=/usr/sbin/ip address add 10.64.2.31/24 dev storagex
+
+        ExecStart=/usr/bin/resolvectl dns managementx 10.10.10.10
+
+        [Install]
+        WantedBy=multi-user.target
+
