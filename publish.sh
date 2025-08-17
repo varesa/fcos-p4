@@ -24,3 +24,8 @@ podman tag "$TMP" "$REMOTE:latest"
 [ "$CLEAN" == "true" ] && podman push "$REMOTE:$DATE-$HASH"
 podman push "$REMOTE:$DATE"
 podman push "$REMOTE:latest"
+
+echo Refs:
+[ "$CLEAN" == "true" ] && echo "$REMOTE:$DATE-$HASH"
+echo "$REMOTE:$DATE"
+echo "$REMOTE:latest"
