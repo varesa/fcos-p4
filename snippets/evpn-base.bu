@@ -3,6 +3,13 @@ version: 1.6.0
 
 storage:
   files:
+    - path: /etc/sysctl.d/50-network.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+            net.ipv4.ip_forward=1
+            net.ipv4.conf.all.rp_filter=2
     - path: /etc/frr/daemons
       mode: 0644
       overwrite: true
