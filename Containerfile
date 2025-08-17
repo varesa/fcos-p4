@@ -24,6 +24,8 @@ RUN dnf install -y \
         openvswitch-$INSTALL_OVS_VERSION \
         libvirt-client-$INSTALL_LIBVIRT_VERSION libvirt-daemon-kvm-$INSTALL_LIBVIRT_VERSION \
         qemu-kvm-$INSTALL_QEMU_VERSION \
+        # ceph client utils, likely to not track the actual cluster version anyway
+        cephadm ceph-common \
         tcpdump iperf3 htop \
     && \
     dnf clean all && \
