@@ -72,8 +72,6 @@ systemd:
         ExecStart=/usr/sbin/ip link add link br0 name storagex up type vlan id 2102
         ExecStart=/usr/sbin/ip address add 10.4.2.36/24 dev storagex
 
-        ExecStart=/usr/bin/resolvectl dns managementx 10.10.10.10
-
         [Install]
         WantedBy=multi-user.target
 
