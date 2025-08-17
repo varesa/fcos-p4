@@ -1,4 +1,6 @@
-FROM quay.io/fedora/fedora-coreos:42.20250611.20.0@sha256:16df419deaa715eed748bba79dd0bf4e3fb06e5452e96e10baa5bdcf4c2f585b
+# https://quay.io/repository/fedora/fedora-coreos?tab=tags
+# skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '"quay.io/fedora/fedora-coreos:\(.Labels."org.opencontainers.image.version")@\(.Digest)"'
+FROM quay.io/fedora/fedora-coreos:42.20250721.3.0@sha256:67c9125048afe7168a7da7353ee4c15bca8bd1220bfcde4a54bfaf086badba35
 
 ENV INSTALL_K3S_VERSION=v1.31.5+k3s1
 ENV INSTALL_FRR_VERSION=10.2-4.fc42
