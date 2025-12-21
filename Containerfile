@@ -19,19 +19,23 @@ RUN sh /tmp/install-k3s.sh && \
     ln -s ../k3s.service /usr/lib/systemd/system/multi-user.target.wants/k3s.service && \
     ostree container commit
 
-RUN dnf install -y \
+RUN <<EOF
+    set -euo pipefail
+
+    dnf install -y \
         frr-$INSTALL_FRR_VERSION \
         openvswitch-$INSTALL_OVS_VERSION \
         libvirt-client-$INSTALL_LIBVIRT_VERSION libvirt-daemon-kvm-$INSTALL_LIBVIRT_VERSION \
         qemu-kvm-$INSTALL_QEMU_VERSION \
-        # ceph client utils, likely to not track the actual cluster version anyway
+        # ceph client utils, likely to not track the actual cluster version anyway \
         cephadm ceph-common \
         tcpdump iperf3 htop \
-        netdata \
-    && \
-    dnf clean all && \
-    rm -rf /var/run && \
+        netdata
+
+    dnf clean all
+    rm -rf /var/run
     ostree container commit
+EOF
 
 RUN <<EOF
     sed -i 's/bind to =.*/bind to = 0.0.0.0/' /etc/netdata/netdata.conf
