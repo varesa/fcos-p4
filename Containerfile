@@ -27,7 +27,14 @@ RUN dnf install -y \
         # ceph client utils, likely to not track the actual cluster version anyway
         cephadm ceph-common \
         tcpdump iperf3 htop \
+        netdata \
     && \
     dnf clean all && \
     rm -rf /var/run && \
     ostree container commit
+
+RUN <<EOF
+    sed -i 's/bind to =.*/bind to = 0.0.0.0/' /etc/netdata/netdata.conf
+    echo 'enable netdata.service' >> /etc/systemd/system-preset/99-netdata.preset
+    ostree container commit
+EOF
