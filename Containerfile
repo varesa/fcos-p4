@@ -1,12 +1,12 @@
 # https://quay.io/repository/fedora/fedora-coreos?tab=tags
 # skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '"quay.io/fedora/fedora-coreos:\(.Labels."org.opencontainers.image.version")@\(.Digest)"'
-FROM quay.io/fedora/fedora-coreos:42.20250721.3.0@sha256:67c9125048afe7168a7da7353ee4c15bca8bd1220bfcde4a54bfaf086badba35
+FROM quay.io/fedora/fedora-coreos:43.20251120.3.0@sha256:ce746b7118464d58b7d5a55d496cfb48dee83c59d3db4de34f33a05a332c6513
 
 ENV INSTALL_K3S_VERSION=v1.31.5+k3s1
-ENV INSTALL_FRR_VERSION=10.2-4.fc42
-ENV INSTALL_LIBVIRT_VERSION=11.0.0-1.fc42
-ENV INSTALL_QEMU_VERSION=9.2.3-1.fc42
-ENV INSTALL_OVS_VERSION=3.4.1-1.fc42
+ENV INSTALL_FRR_VERSION=10.4.1-2.fc43
+ENV INSTALL_LIBVIRT_VERSION=11.6.0-2.fc43
+ENV INSTALL_QEMU_VERSION=10.1.3-1.fc43
+ENV INSTALL_OVS_VERSION=3.6.0-2.fc43
 
 ENV INSTALL_K3S_BIN_DIR=/usr/bin
 ENV INSTALL_K3S_SYSTEMD_DIR=/usr/lib/systemd/system
