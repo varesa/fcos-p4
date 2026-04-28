@@ -22,6 +22,9 @@ RUN sh /tmp/install-k3s.sh && \
 RUN <<EOF
     set -euo pipefail
 
+    # Workaround for https://github.com/coreos/fedora-coreos-tracker/issues/572
+    dnf swap -y nfs-utils-coreos nfs-utils
+
     dnf install -y \
         frr-$INSTALL_FRR_VERSION \
         openvswitch-$INSTALL_OVS_VERSION \
