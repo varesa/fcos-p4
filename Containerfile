@@ -32,7 +32,7 @@ RUN <<EOF
         qemu-kvm-$INSTALL_QEMU_VERSION \
         cephadm ceph-common \
         tcpdump iperf3 htop \
-        smartmontools
+        puppet smartmontools
 
     dnf clean all
     rm -rf /var/run
